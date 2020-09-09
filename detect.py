@@ -11,7 +11,7 @@ import torch.backends.cudnn as cudnn
 from numpy import random
 
 from models.experimental import attempt_load
-from utils.datasets import LoadStreams, LoadImages
+from utils.datasets import LoadStreams, LoadImages, LoadRealSense2
 from utils.general import (
     check_img_size, non_max_suppression, apply_classifier, scale_coords,
     xyxy2xywh, plot_one_box, strip_optimizer, set_logging)
@@ -21,7 +21,7 @@ from utils.torch_utils import select_device, load_classifier, time_synchronized
 def detect(save_img=False):
     out, source, weights, view_img, save_txt, imgsz = \
         opt.output, opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size
-    webcam = source.isnumeric() or source.startswith('rtsp') or source.startswith('http') or source.endswith('.txt')
+    webcam = source.isnumeric() or source.startswith('rtsp') or source.startswith('http') or source.endswith('.txt') or source =='realsense'
 
     # Initialize
     set_logging()
@@ -49,7 +49,11 @@ def detect(save_img=False):
     if webcam:
         view_img = True
         cudnn.benchmark = True  # set True to speed up constant image size inference
-        dataset = LoadStreams(source, img_size=imgsz)
+
+        if source=='realsense':
+            dataset = LoadRealSense2()
+        else:
+            dataset = LoadStreams(source, img_size=imgsz)
     else:
         save_img = True
         dataset = LoadImages(source, img_size=imgsz)
